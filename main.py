@@ -1,3 +1,17 @@
+'''
+TODO-list:
+ - Criar Snake.hit
+ - Guardar pontuação
+ - Ajustar Window.draw para exibir pontuação
+ - Criar configuração de nível/velocidade
+ 
+ - Criar Snake.eat
+ - Ajustar Snake.draw
+  
+ - Criar Snake.collided e finalização do jogo
+ - Criar tela de fim
+'''
+
 # Bibliotecas
 import pygame
 import random as rnd
@@ -17,24 +31,18 @@ DELAY = 200
 # Direções
 D_UP, D_DOWN, D_LEFT, D_RIGHT = [0, 1, 2, 3]
 
-# Cores
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-
-# https://coolors.co/306b34-1c5253-f3ffc6-c3eb78-b6174b
-DARTMOUTH_GREEN = (48, 107, 52)
-DEEP_JUNGLE_GREEN = (28, 82, 83)
-CREAM = (243, 255, 198)
-YELLOW_GREEN = (195, 235, 120)
-CARMINE = (182, 23, 75)
+# Constantes de cores
+TEXT = (45, 45, 42)
+BACKGROUND = (6, 214, 160)
+SNAKE = (45, 45, 42)
+LINE = (63, 94, 90)
+BAIT = (239, 71, 111)
 
 
 class Cube:
     ''' Classe que representa um elemento simples do jogo '''
 
-    def __init__(self, position, color=RED):
+    def __init__(self, position, color):
         self.position = position
         self.color = color
 
@@ -68,7 +76,7 @@ class Snake:
     ''' Classe que representa a entidade principal do jogo '''
 
     def __init__(self):
-        self.body = [Cube((0, 0), GREEN)]
+        self.body = [Cube((0, 0), SNAKE)]
         self.dirs = [D_RIGHT]
 
     def move(self, dir_=None):
@@ -92,16 +100,16 @@ class Window:
     @staticmethod
     def draw(surface, points=0):
         # Background
-        surface.fill(DEEP_JUNGLE_GREEN)
+        surface.fill(BACKGROUND)
 
         u = BORDER
         # Grade
 
         for i in range(0, ROWS + 1):
-            pygame.draw.line(surface, YELLOW_GREEN,
+            pygame.draw.line(surface, LINE,
                              (u, BORDER), (u, HEIGHT - BORDER))
 
-            pygame.draw.line(surface, YELLOW_GREEN,
+            pygame.draw.line(surface, LINE,
                              (BORDER, u), (WIDTH - BORDER, u))
 
             u += BLOCK
@@ -113,14 +121,14 @@ def main():
     pygame.display.set_caption('SnakeGame IFCE')
 
     # Auxiliares
-    exit_ = False
+    ext = False
 
     # Elementos
     s = Snake()
-    b = Cube((3, 2), YELLOW_GREEN)
+    b = Cube((3, 2), BAIT)
 
     # Laço principal
-    while not exit_:
+    while not ext:
         # Delay
         pygame.time.delay(DELAY)
 
@@ -133,7 +141,7 @@ def main():
         for e in events:
             # Evento de clique no X da janela
             if e.type == QUIT:
-                exit_ = True
+                ext = True
 
             # Teclado
             if e.type == KEYDOWN:
@@ -146,11 +154,11 @@ def main():
                 elif e.key in (K_RIGHT, K_d):
                     dir_ = D_RIGHT
                 elif e.key == K_ESCAPE:
-                    exit_ = True
+                    ext = True
 
         if s.body[0].position[0] == b.position[0] and s.body[0].position[1] == b.position[1]:
             b = Cube((rnd.randint(0, ROWS-1),
-                      rnd.randint(0, ROWS-1)), YELLOW_GREEN)
+                      rnd.randint(0, ROWS-1)), BAIT)
 
         # Ações
         s.move(dir_)
