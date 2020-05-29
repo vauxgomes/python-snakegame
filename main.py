@@ -169,7 +169,7 @@ def main():
     # Jogo
     score = 0
     delay = DELAY
-    collided = True
+    collided = False
 
     # Elementos
     snake = Snake()
