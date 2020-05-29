@@ -1,17 +1,3 @@
-'''
-TODO-list:
- - Criar Snake.hit
- - Guardar pontuação
- - Ajustar Window.draw para exibir pontuação
- - Criar configuração de nível/velocidade
- 
- - Criar Snake.eat
- - Ajustar Snake.draw
-  
- - Criar Snake.collided e finalização do jogo
- - Criar tela de fim
-'''
-
 # Bibliotecas
 import pygame
 import random as rnd
@@ -25,17 +11,19 @@ BORDER = 50
 ROWS = 10
 BLOCK = (WIDTH - 2*BORDER)//ROWS
 
-# Jogo
-DELAY = 200
+# Jogo                                                                                                                                                                          
+DELAY = 250
+DELAY_MIN = 75
+DELAY_STEP = 100
 
 # Direções
-D_UP, D_DOWN, D_LEFT, D_RIGHT = [0, 1, 2, 3]
+D_UP, D_DOWN, D_LEFT, D_RIGHT = [0, 2, 1, 3]
 
 # Constantes de cores
 TEXT = (45, 45, 42)
 BACKGROUND = (6, 214, 160)
 SNAKE = (45, 45, 42)
-LINE = (63, 94, 90)
+GRID = (63, 94, 90)
 BAIT = (239, 71, 111)
 
 
@@ -78,9 +66,25 @@ class Snake:
     def __init__(self):
         self.body = [Cube((0, 0), SNAKE)]
         self.dirs = [D_RIGHT]
+        self.belly = []
+
+    def hit(self, c: Cube):
+        return self.body[0].position == c.position
+
+    def eat(self):
+        self.belly.append(Cube(self.body[0].position, GRID))
+        self.dirs.append(self.dirs[0])
+
+    def collided(self):
+        for i in range(1, len(self.body)):
+            if self.hit(self.body[i]):
+                return True
+
+        return False
+
 
     def move(self, dir_=None):
-        if dir_ is None:
+        if dir_ is None or abs(dir_ - self.dirs[0]) == 2:
             dir_ = self.dirs[0]
 
         self.dirs.insert(0, dir_)
@@ -90,6 +94,19 @@ class Snake:
             c.move(self.dirs[i])
 
     def draw(self, surface):
+        if len(self.belly) > 0:
+            b = self.belly[0]
+            hit_ = False
+
+            for c in self.body:
+                if c.position == b.position:
+                    hit_ = True
+                    break
+
+            if not hit_:
+                self.belly.remove(b)
+                self.body.append(b)
+
         for c in self.body:
             c.draw(surface)
 
@@ -98,39 +115,70 @@ class Window:
     ''' Classe que exibe os elementos de tela '''
 
     @staticmethod
-    def draw(surface, points=0):
+    def draw(surface, score=0):
         # Background
         surface.fill(BACKGROUND)
 
-        u = BORDER
         # Grade
-
+        u = BORDER
+        
         for i in range(0, ROWS + 1):
-            pygame.draw.line(surface, LINE,
+            pygame.draw.line(surface, GRID,
                              (u, BORDER), (u, HEIGHT - BORDER))
 
-            pygame.draw.line(surface, LINE,
+            pygame.draw.line(surface, GRID,
                              (BORDER, u), (WIDTH - BORDER, u))
 
             u += BLOCK
 
+        # Score
+        text = Window.font.render(f'PONTOS: {score}', True, TEXT)
+        surface.blit(text, (BORDER, BORDER - 26))
+    
+    @staticmethod
+    def end(surface, score):
+        # Background
+        surface.fill(BACKGROUND)
+
+        # Logo
+        font = pygame.font.SysFont('arial', 40)
+
+        text = font.render('SnakeGame', True, TEXT)
+        textRect = text.get_rect()
+        textRect.center = (WIDTH//2, HEIGHT//2 - 20)
+        surface.blit(text, textRect)
+
+        # Score
+        text = Window.font.render(f'PONTOS: {score}', True, TEXT)
+        textRect = text.get_rect()
+        textRect.center = (WIDTH//2, (HEIGHT//2) + 10)
+        surface.blit(text, textRect)
 
 def main():
     # PyGame
+    pygame.init()
+
     surface = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption('SnakeGame IFCE')
+    pygame.display.set_caption('SnakeGame')
+
+    Window.font = pygame.font.SysFont('arial', 24)
 
     # Auxiliares
     ext = False
 
+    # Jogo
+    score = 0
+    delay = DELAY
+    collided = True
+
     # Elementos
-    s = Snake()
-    b = Cube((3, 2), BAIT)
+    snake = Snake()
+    bait = Cube((3, 2), BAIT)
 
     # Laço principal
     while not ext:
         # Delay
-        pygame.time.delay(DELAY)
+        pygame.time.delay(max(DELAY_MIN, delay))
 
         # Eventos
         events = pygame.event.get()
@@ -156,17 +204,31 @@ def main():
                 elif e.key == K_ESCAPE:
                     ext = True
 
-        if s.body[0].position[0] == b.position[0] and s.body[0].position[1] == b.position[1]:
-            b = Cube((rnd.randint(0, ROWS-1),
-                      rnd.randint(0, ROWS-1)), BAIT)
+        # Não colidiu
+        if not collided:
+            if snake.collided():
+                collided = True
+                continue
 
-        # Ações
-        s.move(dir_)
+            if snake.hit(bait):
+                snake.eat()
+                bait.position =  (rnd.randint(0, ROWS-1), rnd.randint(0, ROWS-1))
+                score += 1
 
-        # Desenhar os elementos
-        Window.draw(surface)
-        b.draw(surface)
-        s.draw(surface)
+                if score % 3 == 0:
+                    delay -= DELAY_STEP
+
+            # Ações
+            snake.move(dir_)
+
+            # Desenhar os elementos
+            Window.draw(surface, score)
+            bait.draw(surface)
+            snake.draw(surface)
+        
+        # Colidiu
+        else:
+            Window.end(surface, score)
 
         # Atualização
         pygame.display.update()
