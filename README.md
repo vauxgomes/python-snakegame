@@ -9,6 +9,8 @@
 - [Description](#description)
 - [Screenshot](#screenshot)
 - [Getting started](#getting-started)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
   - [Notes](#notes)
 - [Licence](#licence)
 - [Contact](#contact)
@@ -34,7 +36,9 @@ $ git clone https://github.com/vauxgomes/python-snakegame.git
 $ python -m pip install -U pygame
 ```
 
-### Main configuration
+### Configuration
+Use these constants to configure your profile game. Additionally, one can use these constants to create different levels for his/her game.
+
 ```py
 # Screen
 WIDTH = 500
@@ -44,6 +48,11 @@ HEIGHT = 500
 BORDER = 50
 ROWS = 10
 BLOCK = (WIDTH - 2*BORDER)//ROWS
+
+# Game
+DELAY = 250
+DELAY_MIN = 75
+DELAY_STEP = 100
 ```
 
 ### Notes
