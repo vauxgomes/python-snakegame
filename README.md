@@ -50,7 +50,7 @@ BLOCK = (WIDTH - 2*BORDER)//ROWS
  - This code is written in English with Portuguese-br comments
 
 ## License
-Distributed under the MIT License. See LICENSE for more information
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information
 
 ## Contact
 [![LinkedIn](https://img.shields.io/badge/-linkedin-blue?logo=linkedin)](https://www.linkedin.com/in/vauxgomes/)
