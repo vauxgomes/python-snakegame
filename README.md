@@ -24,7 +24,7 @@ Implementation of a simple arcade style __snake game__ with `pygame`.
 ## Getting started
 To get a local copy up and running follow these simple steps.
 
-### Instalation
+### Installation
 1. Clone this repository
 ```sh
 $ git clone https://github.com/vauxgomes/python-snakegame.git
